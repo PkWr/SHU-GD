@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<!-- PRE-LAUNCH: remove this line at launch so search engines can index the page -->
+<meta name="robots" content="noindex, nofollow">
+<title>Graphic Design at Sheffield Hallam</title>
+<meta name="description" content="BA (Hons) Graphic Design at Sheffield Hallam University: student work, live briefs, alumni and staff news, and events.">
+<style>
+/* Layout and styles follow pkwr.co: full-bleed stage + details panel on the right, behind a yellow strip.
+   IBM Plex Mono, self-hosted and inlined at build (SIL Open Font License, see code/fonts/OFL.txt) */
+@font-face { font-family: "IBM Plex Mono"; font-style: italic; font-weight: 300; font-display: swap; src: url("fonts/ibm-plex-mono-latin-300-italic.woff2") format("woff2"); }
+@font-face { font-family: "IBM Plex Mono"; font-style: normal; font-weight: 300; font-display: swap; src: url("fonts/ibm-plex-mono-latin-300-normal.woff2") format("woff2"); }
+@font-face { font-family: "IBM Plex Mono"; font-style: italic; font-weight: 400; font-display: swap; src: url("fonts/ibm-plex-mono-latin-400-italic.woff2") format("woff2"); }
+
+:root {
+  --ink: #111;
+  --paper: #f4f2ee;
+  --muted: #6b6862;
+  --rule: #d9d5ce;
+  --stage: #0b0b0b;
+  --strip-w: 44px;
+  --panel-w: max(320px, calc(100vw / 3 - var(--strip-w)));
+  --strip: #ffe100;
+  --strip-hover: #ffd000;
+  --panel-bg: #fff;
+  --gutter: 28px;
+  --font: "IBM Plex Mono", ui-monospace, Menlo, Consolas, monospace;
+  --ease: cubic-bezier(.2, .7, .2, 1);
+}
+* { box-sizing: border-box; }
+h1, h2, h3, h4, strong, b, th, dt { font-weight: 400; }   /* no bold anywhere */
+html { font-synthesis: none; }
+html, body { margin: 0; height: 100%; }
+body { font-family: var(--font); font-style: italic; color: var(--ink); background: var(--paper); -webkit-font-smoothing: antialiased; }
+a { color: inherit; text-underline-offset: 3px; }
+button { font: inherit; color: inherit; }
+
+/* ---------- Layout ---------- */
+.project { position: relative; height: 100vh; height: 100dvh; overflow: hidden; }
+
+/* ---------- Stage ---------- */
+.stage { position: absolute; inset: 0; background: var(--stage) center / cover no-repeat; overflow: hidden; --fade: 900ms; }
+.slide { position: absolute; inset: 0; opacity: 0; transition: opacity var(--fade) ease-in-out; pointer-events: none; display: flex; align-items: center; justify-content: center; }
+.slide.is-active { opacity: 1; }
+.slide video, .slide img { width: 100%; height: 100%; display: block; object-fit: cover; }
+.slide.entry img { object-fit: contain; }
+/* keep the reel and entry images centred on the part of the stage the panel doesn't cover */
+.project:not(.panel-hidden) .slide { right: calc(var(--panel-w) + var(--strip-w)); transition: opacity var(--fade) ease-in-out, right 450ms var(--ease); }
+.project.panel-hidden .slide { right: var(--strip-w); transition: opacity var(--fade) ease-in-out, right 450ms var(--ease) 260ms; }
+
+.home-link {
+  position: absolute; top: 16px; left: 22px; z-index: 4; color: #fff; text-decoration: none;
+  font-size: 22px; font-weight: 300; letter-spacing: -0.02em; text-shadow: 0 0 12px rgba(0,0,0,.45); opacity: .85;
+}
+.home-link:hover { opacity: 1; }
+
+.stage-bar {
+  position: absolute; left: 0; right: 0; bottom: 0; z-index: 3;
+  display: flex; align-items: flex-end; justify-content: space-between; gap: 16px;
+  padding: 18px 22px; color: #eee; font-size: 13px;
+  background: linear-gradient(transparent, rgba(0,0,0,.55)); pointer-events: none;
+  transition: padding-right 450ms var(--ease), opacity 600ms ease;
+  padding-right: calc(var(--panel-w) + var(--strip-w) + 22px);
+}
+.project.panel-hidden .stage-bar { padding-right: calc(var(--strip-w) + 22px); transition: padding-right 450ms var(--ease) 260ms, opacity 600ms ease; }
+.stage-bar > * { pointer-events: auto; }
+.caption { max-width: 60ch; line-height: 1.4; opacity: .9; }
+.caption button { background: none; border: 0; padding: 0; cursor: pointer; text-decoration: underline; text-underline-offset: 3px; }
+.controls button { color: #fff; background: none; border: 0; min-width: 44px; height: 44px; padding: 0 6px; cursor: pointer; opacity: .8; font-style: normal; }
+.controls button:hover { opacity: 1; }
+.controls button:focus-visible, .caption button:focus-visible { outline: 1px solid #fff; outline-offset: 2px; }
+.controls [hidden] { display: none !important; }
+.ui-idle .stage-bar { opacity: 0; pointer-events: none; }
+
+/* ---------- Drawer: strip + panel ---------- */
+.drawer {
+  position: absolute; top: 0; right: 0; bottom: 0; z-index: 5; display: flex;
+  background: var(--panel-bg); box-shadow: -10px 0 30px rgba(0,0,0,.22);
+  transition: transform 450ms var(--ease), background-color 700ms ease 120ms;
+}
+.project.panel-hidden .drawer { transform: translateX(var(--panel-w)); background: var(--strip); transition: transform 450ms var(--ease) 260ms, background-color 420ms ease; }
+.project.panel-hidden .panel { visibility: hidden; transition: visibility 0s linear 720ms; }
+.panel > * { transition: opacity 400ms ease 250ms; }
+.project.panel-hidden .panel > * { opacity: 0; transition: opacity 180ms ease; }
+
+.strip {
+  width: var(--strip-w); flex-shrink: 0; margin: 0; padding: 22px 0; border: 0;
+  background: var(--strip); color: var(--ink); cursor: pointer;
+  display: flex; flex-direction: column; align-items: center; justify-content: space-between;
+  transition: background-color 700ms ease 120ms;
+}
+.project.panel-hidden .strip { transition: background-color 420ms ease; }
+.project.panel-hidden .strip:hover { background: var(--strip-hover); }
+.project:not(.panel-hidden) .strip { background: var(--panel-bg); }
+.strip:focus-visible { outline: 2px solid var(--ink); outline-offset: -4px; }
+.strip-label { writing-mode: vertical-rl; transform: rotate(180deg); font-size: 12px; letter-spacing: .12em; text-transform: uppercase; white-space: nowrap; }
+.strip-icon { font-size: 22px; line-height: 1; font-style: normal; transition: transform 300ms var(--ease); }
+.project:not(.panel-hidden) .strip-icon { transform: rotate(45deg); }
+
+.panel { width: var(--panel-w); overflow-y: auto; padding: var(--gutter); display: flex; flex-direction: column; gap: 28px; }
+.eyebrow, .panel h2 { font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); font-weight: 400; margin: 0 0 10px; }
+.panel header .eyebrow { margin-bottom: 14px; }
+.panel h1 { font-size: clamp(30px, 2.6vw, 42px); line-height: 1; letter-spacing: -0.03em; font-weight: 300; margin: 0; }
+.panel .subtitle { margin: 10px 0 0; color: var(--muted); font-size: 14px; line-height: 1.5; }
+.sec { scroll-margin-top: 64px; }
+.sec p { margin: 0 0 1em; font-size: 14px; line-height: 1.6; max-width: 60ch; }
+.sec p:last-child { margin-bottom: 0; }
+
+/* sub-nav: sticks to the top of the panel */
+.subnav {
+  position: sticky; top: calc(-1 * var(--gutter)); z-index: 2;
+  margin: 0 calc(-1 * var(--gutter)); padding: 14px var(--gutter) 12px;
+  background: var(--panel-bg); border-bottom: 1px solid var(--rule);
+}
+.subnav ul, .filters { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 6px 16px; }
+.subnav a, .filters button {
+  font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted);
+  text-decoration: none; padding: 0 0 2px; background: none; border: 0; cursor: pointer;
+  transition: color 200ms ease, box-shadow 200ms ease;
+}
+.subnav a:hover, .filters button:hover { color: var(--ink); }
+.subnav a.is-active, .filters button[aria-pressed="true"] { color: var(--ink); box-shadow: inset 0 -2px 0 var(--strip); }
+.filters { margin: 0 0 14px; }
+.filters .n { opacity: .6; }
+
+/* at a glance */
+dl.meta { margin: 0; display: grid; grid-template-columns: 8.5em 1fr; border-top: 1px solid var(--ink); font-size: 13px; }
+dl.meta dt, dl.meta dd { margin: 0; padding: 9px 0; border-bottom: 1px solid var(--rule); line-height: 1.4; }
+dl.meta dt { color: var(--muted); font-size: 11px; text-transform: uppercase; letter-spacing: .06em; padding-top: 11px; }
+
+/* entry menus (activity + upcoming) */
+.menu ul { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--ink); }
+.menu li { border-bottom: 1px solid var(--rule); }
+.entry-row {
+  display: grid; grid-template-columns: 1fr auto; align-items: baseline; gap: 2px 12px;
+  width: calc(100% + 12px); margin: 0 -6px; padding: 10px 6px; text-align: left;
+  background: none; border: 0; cursor: pointer; font-style: italic;
+}
+.menu-kind { grid-column: 1 / -1; font-size: 10.5px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+.menu-label { font-size: 20px; font-weight: 300; letter-spacing: -0.02em; line-height: 1.15; }
+.menu-meta { font-size: 12px; color: var(--muted); white-space: nowrap; font-variant-numeric: tabular-nums; }
+.entry-row:hover .menu-label, .entry-row:focus-visible .menu-label { font-style: normal; }   /* hover: italic to upright */
+.entry-row:focus-visible { outline: 1px solid var(--ink); outline-offset: 2px; }
+.entry-row[aria-expanded="true"] .menu-label::after { content: " \2190"; font-size: 15px; }
+.sample { font-size: 11px; color: var(--muted); letter-spacing: .04em; }
+.entry-body { padding: 2px 0 16px; }
+.entry-body .sub { font-size: 12px; color: var(--muted); margin: 0 0 8px; }
+.entry-body p { font-size: 14px; line-height: 1.6; margin: 0 0 10px; }
+.entry-body .acts { display: flex; flex-wrap: wrap; gap: 4px 16px; font-size: 13px; }
+.entry-body .acts a[target="_blank"]::after { content: " \2197"; }
+.more { margin-top: 12px; background: none; border: 0; padding: 4px 0; cursor: pointer; font-size: 13px; text-decoration: underline; text-underline-offset: 3px; }
+.empty { font-size: 13px; color: var(--muted); padding: 10px 0; margin: 0; }
+
+/* links lists (Study / Work with us) */
+.links ul { list-style: none; margin: 0; padding: 0; font-size: 14px; border-top: 1px solid var(--ink); }
+.links li { padding: 8px 0; border-bottom: 1px solid var(--rule); }
+.links a[target="_blank"]::after { content: " \2197"; }
+
+.panel footer { margin-top: auto; font-size: 12px; color: var(--muted); display: flex; justify-content: space-between; gap: 12px; }
+
+/* ---------- Phones: stage fixed, panel scrolls up over it ---------- */
+@media (max-width: 860px) {
+  .project { height: auto; overflow: visible; --peek: 18svh; }
+  .stage { position: fixed; inset: 0; height: 100vh; height: 100svh; }
+  .project .slide, .project.panel-hidden .slide { right: 0; bottom: var(--peek); }
+  .drawer, .project.panel-hidden .drawer { position: relative; display: block; transform: none; margin-top: calc(100svh - var(--peek)); background: transparent; box-shadow: none; }
+  .strip { display: none; }
+  .project.panel-hidden .panel > * { opacity: 1; }
+  .panel, .project.panel-hidden .panel {
+    width: auto; visibility: visible; overflow: visible; background: var(--panel-bg);
+    min-height: calc(100svh - var(--peek)); padding: 28px 16px 40px;
+    box-shadow: 0 -10px 30px rgba(0,0,0,.25); position: relative;
+  }
+  .panel::before { content: ""; position: absolute; top: 10px; left: 50%; width: 36px; height: 3px; margin-left: -18px; border-radius: 2px; background: var(--rule); }
+  .subnav { top: 0; margin: 0 -16px; padding: 12px 16px; }
+  .stage-bar, .project.panel-hidden .stage-bar { padding-right: 22px; bottom: var(--peek); }
+  .caption { display: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .slide, .drawer, .panel > *, .stage-bar, .strip-icon { transition: none !important; }
+}
+.no-anim .drawer, .no-anim .panel, .no-anim .panel > *, .no-anim .strip, .no-anim .stage-bar, .no-anim .slide { transition: none !important; }
+</style>
+</head>
+<body>
+<div class="project no-anim" id="app">
+  <div class="stage" id="stage">
+    <div class="slide is-active" id="reel-slide"><video id="hero-video" muted loop playsinline preload="none" aria-hidden="true"></video></div>
+    <div class="slide entry" id="entry-slide"><img id="entry-img" alt=""></div>
+    <a class="home-link" href="#top">SHU GD</a>
+    <div class="stage-bar">
+      <div class="caption" id="caption"></div>
+      <div class="controls"><button id="reel-toggle" type="button" aria-label="Pause showreel" hidden>❚❚</button></div>
+    </div>
+  </div>
+
+  <aside class="drawer" aria-label="Course information">
+    <button class="strip" id="strip" type="button" aria-controls="panel" aria-expanded="true">
+      <span class="strip-label">BA (Hons) Graphic Design · Sheffield Hallam</span>
+      <span class="strip-icon" aria-hidden="true">+</span>
+    </button>
+    <div class="panel" id="panel">
+      <header id="top">
+        <p class="eyebrow">Sheffield Hallam University</p>
+        <h1>Graphic Design</h1>
+        <p class="subtitle" id="headline"></p>
+      </header>
+      <nav class="subnav" aria-label="Sections"><ul>
+        <li><a href="#activity">On the course</a></li>
+        <li><a href="#upcoming">Upcoming</a></li>
+        <li><a href="#study">Study</a></li>
+        <li><a href="#work">Work with us</a></li>
+      </ul></nav>
+      <section class="sec" id="about"></section>
+      <section class="sec" id="glance-sec"><dl class="meta" id="glance"></dl></section>
+      <section class="sec" id="activity">
+        <h2>On the course</h2>
+        <div class="filters" id="filters" role="group" aria-label="Filter by type"></div>
+        <div class="menu"><ul id="act-list"></ul></div>
+        <div id="more-wrap"></div>
+      </section>
+      <section class="sec" id="upcoming">
+        <h2>Upcoming</h2>
+        <div class="menu"><ul id="up-list"></ul></div>
+      </section>
+      <section class="sec" id="study"></section>
+      <section class="sec" id="work"></section>
+      <footer><span id="foot"></span><span id="updated"></span></footer>
+    </div>
+  </aside>
+</div>
+
+<script>
+// ── Constants ────────────────────────────────────────────
+const TYPES = {
+  'student-work':  'Student work',
+  'live-brief':    'Live brief',
+  'collaboration': 'Collaboration',
+  'alumni':        'Alumni',
+  'staff':         'Staff',
+  'event':         'Event',
+  'award':         'Award',
+  'press':         'Press',
+};
+const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+const PAGE = 12;
+const SEP = ' · ';
+
+// ── State ────────────────────────────────────────────────
+const S = { page: {}, activity: [], upcoming: [], type: 'all', shown: PAGE, updated: '' };
+
+// ── Helpers ──────────────────────────────────────────────
+const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+function inline(s) {
+  return esc(s)
+    .replace(/\[([^\]]+)\]\(([^)\s]+)\)/g, (_, t, u) => `<a href="${u}" target="_blank" rel="noopener">${t}</a>`)
+    .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
+    .replace(/\*([^*]+)\*/g, '<em>$1</em>')
+    .replace(/`([^`]+)`/g, '$1');
+}
+const typeKey = t => t.trim().toLowerCase().replace(/\s+/g, '-');
+const typeLabel = k => TYPES[k] || k.replace(/-/g, ' ');
+function parseDate(s) {           // "DD MM·YY"
+  const m = s.trim().match(/^(\d{1,2})\s+(\d{1,2})·(\d{2})$/);
+  return m ? new Date(2000 + +m[3], +m[2] - 1, +m[1]) : null;
+}
+const fmtDate = d => d ? `${d.getDate()} ${MONTHS[d.getMonth()]} ${d.getFullYear()}` : '';
+
+// ── Parser ───────────────────────────────────────────────
+function splitSections(md) {
+  const out = {}; let cur = '_top';
+  out[cur] = [];
+  for (const line of md.split('\n')) {
+    const h = line.match(/^## (.+)$/);
+    if (h) { cur = h[1].trim().toLowerCase(); out[cur] = []; continue; }
+    out[cur].push(line);
+  }
+  return out;
+}
+function parseProse(lines) {
+  const paras = [], links = []; let meta = {};
+  let buf = [];
+  const flush = () => { if (buf.length) { paras.push(buf.join(' ')); buf = []; } };
+  for (const raw of lines) {
+    const l = raw.trim();
+    if (!l || l === '---' || l.startsWith('<!--') || l.startsWith('>')) { flush(); continue; }
+    const kv = l.match(/^\*([A-Za-z ]+):\s*(.+)\*$/);
+    if (kv) { flush(); meta[kv[1].toLowerCase()] = kv[2]; continue; }
+    const li = l.match(/^- \[([^\]]+)\]\(([^)]+)\)$/);
+    if (li) { flush(); links.push({ text: li[1], url: li[2] }); continue; }
+    if (l.startsWith('- ')) { flush(); paras.push(l.slice(2)); continue; }
+    buf.push(l);
+  }
+  flush();
+  return { paras, links, meta };
+}
+function parseEntries(lines, section) {
+  const entries = []; let e = null;
+  for (const raw of lines) {
+    const l = raw.trim();
+    if (l.startsWith('### ')) {
+      const parts = l.slice(4).split(SEP);
+      if (parts.length >= 3) {
+        e = { date: parseDate(parts[0]), type: typeKey(parts[1]), title: parts.slice(2).join(SEP).trim(),
+              meta: {}, tags: [], image: '', desc: [], links: [], section };
+        entries.push(e);
+      }
+      continue;
+    }
+    if (!e) continue;
+    if (l === '---') { e = null; continue; }
+    const img = l.match(/^\*Image:\s*(\S+)\*$/);
+    if (img) { e.image = img[1]; continue; }
+    if (/^\*Type:/.test(l)) {
+      l.replace(/^\*|\*$/g, '').split(SEP).forEach(p => {
+        const i = p.indexOf(':'); if (i < 0) return;
+        const k = p.slice(0, i).trim().toLowerCase(), v = p.slice(i + 1).trim();
+        if (k === 'tags') e.tags = [...v.matchAll(/`([^`]+)`/g)].map(m => m[1]);
+        else if (k === 'type') e.type = typeKey(v);
+        else e.meta[k] = v;
+      });
+      continue;
+    }
+    const lk = [...l.matchAll(/\[([^\]]+)\]\(([^)\s]+)\)/g)];
+    if (lk.length && l.replace(/\[([^\]]+)\]\(([^)\s]+)\)/g, '').replace(/[·\s|]/g, '') === '') {
+      lk.forEach(m => e.links.push({ text: m[1], url: m[2] })); continue;
+    }
+    if (l) e.desc.push(l);
+  }
+  entries.forEach(x => x.sample = x.tags.includes('sample'));
+  return entries;
+}
+function parse(md) {
+  const sec = splitSections(md);
+  const intro = parseProse(sec['intro'] || []);
+  const glance = (sec['at a glance'] || [])
+    .map(l => l.trim().match(/^- (.+?)\s*\|\s*(.+)$/)).filter(Boolean).map(m => ({ k: m[1], v: m[2] }));
+  const all = [...parseEntries(sec['activity'] || [], 'activity'), ...parseEntries(sec['upcoming'] || [], 'upcoming')];
+  const today = new Date(); today.setHours(0, 0, 0, 0);
+  // Upcoming entries whose date has passed drop into the activity feed automatically
+  S.upcoming = all.filter(e => e.section === 'upcoming' && e.date && e.date >= today).sort((a, b) => a.date - b.date);
+  S.activity = all.filter(e => !S.upcoming.includes(e)).sort((a, b) => (b.date || 0) - (a.date || 0));
+  S.page = { intro, glance, study: parseProse(sec['study with us'] || []), work: parseProse(sec['work with us'] || []) };
+  const foot = md.match(/^\*Footer:\s*(.+)\*$/m);
+  S.page.footer = foot ? foot[1].replace(/\s*·?\s*Updated \[auto\]/, '') : '';
+}
+
+// ── Render ───────────────────────────────────────────────
+const $ = id => document.getElementById(id);
+const shortDate = d => d ? `${d.getDate()} ${MONTHS[d.getMonth()]} ${String(d.getFullYear()).slice(2)}` : '';
+let REEL_CAPTION = 'Showreel 2026';
+
+function renderIntro() {
+  const { intro, glance } = S.page;
+  $('headline').textContent = intro.meta.headline || '';
+  $('about').innerHTML = intro.paras.map(p => `<p>${inline(p)}</p>`).join('');
+  $('glance').innerHTML = glance.map(g => `<dt>${esc(g.k)}</dt><dd>${inline(g.v)}</dd>`).join('');
+  $('glance-sec').hidden = !glance.length;
+  if (intro.meta.caption) REEL_CAPTION = intro.meta.caption;
+}
+function buildFilters() {
+  const counts = {};
+  S.activity.forEach(e => counts[e.type] = (counts[e.type] || 0) + 1);
+  const keys = Object.keys(TYPES).filter(k => counts[k]).concat(Object.keys(counts).filter(k => !TYPES[k]));
+  const b = (k, label, n) => `<button type="button" data-type="${k}" aria-pressed="${S.type === k}">${esc(label)} <span class="n">${n}</span></button>`;
+  $('filters').innerHTML = b('all', 'All', S.activity.length) + keys.map(k => b(k, typeLabel(k), counts[k])).join('');
+}
+function entryItem(e, idx, list) {
+  const sub = [e.meta.level, e.meta.module && `Module: ${e.meta.module}`, e.meta.partner && `Partner: ${e.meta.partner}`,
+               e.meta.graduated && `Graduated ${e.meta.graduated}`, e.meta.location, e.meta.format, e.meta.price]
+              .filter(Boolean).map(inline).join(' · ');
+  const id = `${list}-${idx}`;
+  return `<li><button class="entry-row" type="button" aria-expanded="false" aria-controls="${id}" data-list="${list}" data-idx="${idx}">
+      <span class="menu-kind">${esc(typeLabel(e.type))}${e.sample ? ' <span class="sample">(sample)</span>' : ''}</span>
+      <span class="menu-label">${inline(e.title)}</span><span class="menu-meta">${shortDate(e.date)}</span></button>
+    <div class="entry-body" id="${id}" hidden>
+      ${sub ? `<p class="sub">${sub}</p>` : ''}
+      <p>${e.desc.map(inline).join(' ')}</p>
+      ${e.links.length ? `<div class="acts">${e.links.map(l => `<a href="${esc(l.url)}" target="_blank" rel="noopener">${esc(l.text)}</a>`).join('')}</div>` : ''}
+    </div></li>`;
+}
+function currentActivity() { return S.type === 'all' ? S.activity : S.activity.filter(e => e.type === S.type); }
+function renderActivity() {
+  const list = currentActivity();
+  $('act-list').innerHTML = list.length ? list.slice(0, S.shown).map((e, i) => entryItem(e, i, 'act')).join('') : '<li><p class="empty">Nothing here yet.</p></li>';
+  $('more-wrap').innerHTML = list.length > S.shown ? `<button class="more" type="button" id="more">More (${list.length - S.shown}) ↓</button>` : '';
+}
+function renderUpcoming() {
+  $('up-list').innerHTML = S.upcoming.length ? S.upcoming.map((e, i) => entryItem(e, i, 'up')).join('') : '<li><p class="empty">New dates announced soon.</p></li>';
+}
+function renderAudience(id, title, p) {
+  $(id).innerHTML = `<h2>${title}</h2>${p.paras.map(x => `<p>${inline(x)}</p>`).join('')}` +
+    (p.links.length ? `<div class="links"><ul>${p.links.map(l => `<li><a href="${esc(l.url)}"${/^https?:/.test(l.url) ? ' target="_blank" rel="noopener"' : ''}>${esc(l.text)}</a></li>`).join('')}</ul></div>` : '');
+}
+function render() {
+  renderIntro(); buildFilters(); renderActivity(); renderUpcoming();
+  renderAudience('study', 'Study with us', S.page.study);
+  renderAudience('work', 'Work with us', S.page.work);
+  $('foot').textContent = '© ' + new Date().getFullYear() + ' ' + (S.page.footer.split('·')[0].trim() || 'BA (Hons) Graphic Design');
+  $('updated').textContent = S.updated ? `Updated ${S.updated}` : '';
+}
+
+// ── Stage: showreel + entry images ───────────────────────
+const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+let userPaused = false;
+function setupReel(m) {
+  const v = $('hero-video'), btn = $('reel-toggle'), stage = $('stage');
+  if (m.poster) { stage.style.backgroundImage = `url("${m.poster}")`; v.poster = m.poster; }
+  const still = reduced || (navigator.connection && navigator.connection.saveData);
+  if (!m.video || still) { v.remove(); return; }
+  v.src = (innerWidth < 700 && m['video small']) ? m['video small'] : m.video;
+  const set = playing => { btn.textContent = playing ? '❚❚' : '▶'; btn.setAttribute('aria-label', playing ? 'Pause showreel' : 'Play showreel'); };
+  v.addEventListener('playing', () => { btn.hidden = false; set(true); });
+  v.addEventListener('pause', () => set(false));
+  btn.addEventListener('click', () => { userPaused = !v.paused; v.paused ? v.play() : v.pause(); });
+  document.addEventListener('visibilitychange', () => { if (document.hidden) v.pause(); else if (!userPaused && reelShowing()) v.play().catch(() => {}); });
+  v.play().catch(() => {});
+}
+const reelShowing = () => $('reel-slide').classList.contains('is-active');
+function showReel() {
+  $('entry-slide').classList.remove('is-active'); $('reel-slide').classList.add('is-active');
+  $('caption').textContent = REEL_CAPTION;
+  const v = $('hero-video'); if (v && v.isConnected && !userPaused) v.play().catch(() => {});
+}
+function showEntry(e) {
+  if (!e.image) return showReel();
+  $('entry-img').src = e.image; $('entry-img').alt = e.title;
+  $('reel-slide').classList.remove('is-active'); $('entry-slide').classList.add('is-active');
+  $('caption').innerHTML = `${esc(e.title)}, ${MONTHS[e.date.getMonth()]} ${e.date.getFullYear()}  ·  <button type="button" id="back-reel">Showreel</button>`;
+  const v = $('hero-video'); if (v && v.isConnected) v.pause();
+}
+
+// ── Events ───────────────────────────────────────────────
+function setPanel(open, root = $('app')) {
+  root.classList.toggle('panel-hidden', !open);
+  $('strip').setAttribute('aria-expanded', open);
+  $('strip').setAttribute('aria-label', open ? 'Close course information' : 'Open course information');
+}
+function wireEvents() {
+  const root = $('app');
+  $('strip').addEventListener('click', () => setPanel(root.classList.contains('panel-hidden')));
+  document.addEventListener('keydown', ev => { if (ev.key === 'Escape' && innerWidth > 860) setPanel(root.classList.contains('panel-hidden')); });
+
+  $('filters').addEventListener('click', ev => {
+    const b = ev.target.closest('[data-type]'); if (!b) return;
+    S.type = b.dataset.type; S.shown = PAGE; buildFilters(); renderActivity(); showReel();
+  });
+  $('more-wrap').addEventListener('click', ev => { if (ev.target.closest('#more')) { S.shown += PAGE; renderActivity(); } });
+
+  $('panel').addEventListener('click', ev => {
+    const row = ev.target.closest('.entry-row'); if (!row) return;
+    const open = row.getAttribute('aria-expanded') !== 'true';
+    $('panel').querySelectorAll('.entry-row[aria-expanded="true"]').forEach(r => {
+      r.setAttribute('aria-expanded', 'false'); $(r.getAttribute('aria-controls')).hidden = true;
+    });
+    row.setAttribute('aria-expanded', open); $(row.getAttribute('aria-controls')).hidden = !open;
+    const e = (row.dataset.list === 'act' ? currentActivity() : S.upcoming)[+row.dataset.idx];
+    open ? showEntry(e) : showReel();
+  });
+  $('caption').addEventListener('click', ev => { if (ev.target.closest('#back-reel')) showReel(); });
+
+  // sub-nav: highlight the section in view
+  const links = [...document.querySelectorAll('.subnav a')];
+  const secs = links.map(a => document.querySelector(a.getAttribute('href')));
+  const mark = () => {
+    const scroller = innerWidth > 860 ? $('panel') : null;
+    const top = scroller ? scroller.getBoundingClientRect().top : 0;
+    let cur = 0; secs.forEach((s, i) => { if (s.getBoundingClientRect().top - top < 120) cur = i; });
+    links.forEach((a, i) => a.classList.toggle('is-active', i === cur));
+  };
+  $('panel').addEventListener('scroll', mark, { passive: true }); addEventListener('scroll', mark, { passive: true }); mark();
+
+  // fade the stage bar after a few seconds without activity
+  let idle; const wake = () => { root.classList.remove('ui-idle'); clearTimeout(idle); idle = setTimeout(() => root.classList.add('ui-idle'), 2500); };
+  ['mousemove', 'pointerdown', 'keydown', 'touchstart', 'wheel'].forEach(t => document.addEventListener(t, wake, { passive: true })); wake();
+}
+
+function initShowcase(md, updated) {
+  S.updated = updated || '';
+  parse(md); render(); setupReel(S.page.intro.meta); showReel(); wireEvents();
+  requestAnimationFrame(() => requestAnimationFrame(() => $('app').classList.remove('no-anim')));
+}
+
+// ── BUILD_INJECT ──
+// build-embed.py replaces everything from the marker above to the closing script tag with inlined content.
+</script>
+</body>
+</html>
